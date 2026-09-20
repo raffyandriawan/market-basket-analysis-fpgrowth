@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FP-Growth System{% endblock %}</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary      : #0000CD;
+            --primary-dark : #00009A;
+            --primary-light: #3333D1;
+            --sidebar-width: 240px;
+        }
+
+        * { font-family: 'Poppins', sans-serif; }
+
+        body {
+            background: #f0f2f8;
+            min-height: 100vh;
+        }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            background: var(--primary);
+            color: white;
+            padding: 0 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,205,0.3);
+        }
+        .topbar h6 {
+            font-size: 0.78rem;
+            font-weight: 500;
+            margin: 0;
+            line-height: 1.4;
+            text-align: center;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: white;
+            position: fixed;
+            top: 56px; left: 0; bottom: 0;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.08);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-brand {
+            padding: 24px 20px 16px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+        }
+        .sidebar-brand img {
+            width: 80px;
+            margin-bottom: 8px;
+        }
+        .sidebar-brand span {
+            display: block;
+            font-size: 0.72rem;
+            color: #888;
+            font-weight: 500;
+        }
+
+        .sidebar-nav {
+            padding: 16px 12px;
+            flex: 1;
+        }
+
+        .nav-item-custom {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 16px;
+            border-radius: 10px;
+            color: #555;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+            transition: all 0.2s;
+        }
+        .nav-item-custom:hover {
+            background: #f0f2ff;
+            color: var(--primary);
+        }
+        .nav-item-custom.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,205,0.3);
+        }
+        .nav-item-custom i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid #eee;
+            font-size: 0.72rem;
+            color: #aaa;
+            text-align: center;
+        }
+
+        /* ── MAIN CONTENT ── */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 56px;
+            padding: 28px;
+            min-height: calc(100vh - 56px);
+        }
+
+        /* ── CARDS ── */
+        .card {
+            border: none;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        }
+        .card-header-custom {
+            background: white;
+            border-bottom: 2px solid #f0f2f8;
+            padding: 18px 24px;
+            border-radius: 14px 14px 0 0 !important;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .card-header-custom h5 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #222;
+        }
+
+        /* ── BUTTONS ── */
+        .btn-primary {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+        .btn-outline-primary {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        .btn-outline-primary:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* ── TABLE ── */
+        .table thead th {
+            background: var(--primary);
+            color: white;
+            font-weight: 500;
+            font-size: 0.82rem;
+            border: none;
+            padding: 12px 16px;
+        }
+        .table tbody td {
+            font-size: 0.83rem;
+            padding: 10px 16px;
+            vertical-align: middle;
+            border-color: #f0f2f8;
+        }
+        .table tbody tr:hover { background: #f8f9ff; }
+
+        /* ── ALERTS / TOAST ── */
+        .toast-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        /* ── BADGE ── */
+        .badge-primary {
+            background: #e8e8ff;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        /* ── PAGINATION ── */
+        .page-link {
+            color: var(--primary);
+            border-radius: 6px !important;
+            margin: 0 2px;
+        }
+        .page-item.active .page-link {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* ── MODAL ── */
+        .modal-header {
+            background: var(--primary);
+            color: white;
+            border-radius: 12px 12px 0 0;
+        }
+        .modal-header .btn-close { filter: invert(1); }
+        .modal-content { border-radius: 12px; border: none; }
+
+        /* ── FORM ── */
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(0,0,205,0.15);
+        }
+        .form-label {
+            font-size: 0.83rem;
+            font-weight: 500;
+            color: #444;
+        }
+    </style>
+            
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <h6>FP-Growth Market Basket Analysis System
+            </h6>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <div style="width:60px;height:60px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;">
+                <i class="bi bi-graph-up-arrow" style="font-size:1.6rem;color:white;"></i>
+            </div>
+            <span>FP-Growth System</span>
+            <span style="font-size:0.65rem;color:#bbb;">Data Mining Project</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('manage_data') }}"
+               class="nav-item-custom {% if request.endpoint == 'manage_data' %}active{% endif %}">
+                <i class="bi bi-table"></i>
+                Manage Data
+            </a>
+            <a href="{{ url_for('view_result') }}"
+               class="nav-item-custom {% if request.endpoint == 'view_result' %}active{% endif %}">
+                <i class="bi bi-bar-chart-line"></i>
+                View Result
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            v1.0 - FP-Growth Analysis Tool
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div class="toast-container">
+        <div id="mainToast" class="toast align-items-center border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body" id="toastMessage"></div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Global toast function
+        function showToast(message, type = 'success') {
+            const toast    = document.getElementById('mainToast');
+            const toastMsg = document.getElementById('toastMessage');
+            toast.className = `toast align-items-center border-0 text-white bg-${type === 'success' ? 'success' : 'danger'}`;
+            toastMsg.textContent = message;
+            new bootstrap.Toast(toast, { delay: 3500 }).show();
+        }
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

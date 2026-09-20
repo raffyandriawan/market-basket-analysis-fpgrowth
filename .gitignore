@@ -1,0 +1,25 @@
+# Environment variables (data sensitif)
+.env
+
+# Data transaksi asli perusahaan
+frekuensi_2019.xlsx
+frekuensi_2020.xlsx
+frekuensi_2021.xlsx
+frekuensi_2022.xlsx
+
+# Folder uploads (kemungkinan berisi data sensitif)
+uploads/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# File dokumentasi yang di-exclude
+wireframe.html
+sequence_diagram.html
+diagram_kelas.html
+
+# Virtual environment (kalau ada)
+venv/
+env/
+~$*.xlsx

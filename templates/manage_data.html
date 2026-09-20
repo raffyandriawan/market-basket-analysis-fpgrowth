@@ -1,0 +1,564 @@
+{% extends "base.html" %}
+{% block title %}Manage Data - FP-Growth{% endblock %}
+
+{% block content %}
+
+<!-- PAGE HEADER -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h4 class="fw-700 mb-1" style="color:#222;">Manage Data</h4>
+        <p class="text-muted mb-0" style="font-size:0.83rem;">Kelola data transaksi penjualan</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-primary btn-sm" onclick="showModalInsert()">
+            <i class="bi bi-plus-lg me-1"></i> Tambah Data
+        </button>
+        <button class="btn btn-outline-danger btn-sm" onclick="deleteAll()">
+            <i class="bi bi-trash me-1"></i> Hapus Semua
+        </button>
+    </div>
+</div>
+
+<!-- STAT CARDS -->
+<div class="row g-3 mb-4" id="statCards">
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:44px;height:44px;background:#e8e8ff;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                    <i class="bi bi-receipt" style="color:var(--primary);font-size:1.2rem;"></i>
+                </div>
+                <div>
+                    <div class="fw-600" style="font-size:1.3rem;" id="statTotal">-</div>
+                    <div class="text-muted" style="font-size:0.75rem;">Total Baris</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:44px;height:44px;background:#e8fff0;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                    <i class="bi bi-hash" style="color:#198754;font-size:1.2rem;"></i>
+                </div>
+                <div>
+                    <div class="fw-600" style="font-size:1.3rem;" id="statInvoice">-</div>
+                    <div class="text-muted" style="font-size:0.75rem;">Total Transaksi</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:44px;height:44px;background:#fff8e8;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                    <i class="bi bi-box-seam" style="color:#fd7e14;font-size:1.2rem;"></i>
+                </div>
+                <div>
+                    <div class="fw-600" style="font-size:1.3rem;" id="statProduk">-</div>
+                    <div class="text-muted" style="font-size:0.75rem;">Total Produk</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:44px;height:44px;background:#ffe8e8;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                    <i class="bi bi-calendar3" style="color:#dc3545;font-size:1.2rem;"></i>
+                </div>
+                <div>
+                    <div class="fw-600" style="font-size:1.1rem;" id="statPeriode">-</div>
+                    <div class="text-muted" style="font-size:0.75rem;">Periode Data</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- UPLOAD CARD -->
+<div class="card mb-4">
+    <div class="card-header-custom">
+        <h5><i class="bi bi-cloud-upload me-2" style="color:var(--primary);"></i>Upload Data Transaksi</h5>
+    </div>
+    <div class="card-body p-4">
+        <div class="row align-items-center g-3">
+            <div class="col-md-6">
+                <div id="dropZone"
+                     style="border:2px dashed #c0c8ff;border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:all 0.2s;"
+                     onclick="document.getElementById('fileInput').click()"
+                     ondragover="event.preventDefault();this.style.borderColor='var(--primary)'"
+                     ondragleave="this.style.borderColor='#c0c8ff'"
+                     ondrop="handleDrop(event)">
+                    <i class="bi bi-file-earmark-excel" style="font-size:2rem;color:#198754;"></i>
+                    <p class="mb-1 mt-2 fw-500" style="font-size:0.88rem;">Klik atau drag & drop file Excel</p>
+                    <p class="text-muted mb-0" style="font-size:0.75rem;">Format: .xlsx / .xls</p>
+                    <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="handleFileSelect(this)">
+                </div>
+                <div id="selectedFile" class="mt-2" style="display:none;">
+                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i><span id="fileName"></span></span>
+                </div>
+            </div>
+            <div class="col-md-6">
+    <p class="fw-500 mb-2" style="font-size:0.85rem;">Pastikan file Excel memiliki kolom:</p>
+    <ul style="font-size:0.82rem;color:#555;line-height:2;">
+        <li><code>no_invoice</code> — nomor invoice transaksi</li>
+        <li><code>kode_produk</code> — kode produk</li>
+        <li><code>nama_produk</code> — nama produk</li>
+        <li><code>tanggal_transaksi</code> — tanggal transaksi</li>
+    </ul>
+    <div class="d-flex gap-2 mt-2">
+        <button class="btn btn-primary btn-sm" id="btnUpload" onclick="uploadFile()" disabled>
+            <i class="bi bi-upload me-1"></i> Upload & Simpan
+        </button>
+        <a href="/api/download-template" class="btn btn-outline-success btn-sm">
+            <i class="bi bi-file-earmark-arrow-down me-1"></i> Download Template
+        </a>
+    </div>
+</div>
+        </div>
+
+        <!-- Upload Progress -->
+        <div id="uploadProgress" class="mt-3" style="display:none;">
+            <div class="progress" style="height:8px;border-radius:4px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                     style="width:100%"></div>
+            </div>
+            <p class="text-muted mt-2 mb-0" style="font-size:0.8rem;">Sedang memproses dan menyimpan data...</p>
+        </div>
+    </div>
+</div>
+
+<!-- RIWAYAT UPLOAD -->
+<div class="card mb-4">
+    <div class="card-header-custom">
+        <h5><i class="bi bi-clock-history me-2" style="color:var(--primary);"></i>Riwayat Upload</h5>
+        <button class="btn btn-outline-primary btn-sm" onclick="loadUploadLog()">
+            <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+        </button>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama File</th>
+                        <th>Jumlah Baris</th>
+                        <th>Waktu Upload</th>
+                    </tr>
+                </thead>
+                <tbody id="uploadLogBody">
+                    <tr><td colspan="4" class="text-center text-muted py-3">Memuat...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- DATA TABLE -->
+<div class="card">
+    <div class="card-header-custom">
+        <h5><i class="bi bi-table me-2" style="color:var(--primary);"></i>Data Transaksi</h5>
+        <div class="d-flex gap-2 align-items-center">
+            <input type="text" class="form-control form-control-sm" id="searchInput"
+                   placeholder="Cari invoice / produk..." style="width:220px;"
+                   oninput="debounceSearch()">
+            <select class="form-select form-select-sm" id="perPageSelect" style="width:80px;" onchange="loadData()">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th style="width:50px;">No</th>
+                        <th>No Invoice</th>
+                        <th>Kode Produk</th>
+                        <th>Nama Produk</th>
+                        <th>Tanggal</th>
+                        <th style="width:120px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="6" class="text-center text-muted py-4">Memuat data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- Pagination -->
+        <div class="d-flex align-items-center justify-content-between px-4 py-3 border-top">
+            <div id="paginationInfo" class="text-muted" style="font-size:0.8rem;"></div>
+            <nav><ul class="pagination pagination-sm mb-0" id="pagination"></ul></nav>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL INSERT -->
+<div class="modal fade" id="modalInsert" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>Tambah Data Transaksi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <label class="form-label">No Invoice</label>
+                    <input type="text" class="form-control" id="ins_no_invoice" placeholder="Contoh: 1000001">
+                </div>
+                <div class="mb-3">
+    <label class="form-label">Kode Produk</label>
+    <select class="form-select" id="ins_kode_produk" onchange="fillNamaProduk('ins')">
+        <option value="">-- Pilih Kode Produk --</option>
+    </select>
+</div>
+<div class="mb-3">
+    <label class="form-label">Nama Produk</label>
+    <input type="text" class="form-control" id="ins_nama_produk" readonly 
+           style="background:#f8f9fa;">
+</div>
+                <div class="mb-3">
+                    <label class="form-label">Tanggal Transaksi</label>
+                    <input type="date" class="form-control" id="ins_tanggal">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                <button class="btn btn-primary btn-sm" onclick="insertData()">
+                    <i class="bi bi-save me-1"></i>Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL EDIT -->
+<div class="modal fade" id="modalEdit" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-pencil me-2"></i>Edit Data Transaksi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="edit_id">
+                <div class="mb-3">
+                    <label class="form-label">No Invoice</label>
+                    <input type="text" class="form-control" id="edit_no_invoice">
+                </div>
+                <div class="mb-3">
+    <label class="form-label">Kode Produk</label>
+    <select class="form-select" id="edit_kode_produk" onchange="fillNamaProduk('edit')">
+        <option value="">-- Pilih Kode Produk --</option>
+    </select>
+</div>
+<div class="mb-3">
+    <label class="form-label">Nama Produk</label>
+    <input type="text" class="form-control" id="edit_nama_produk" readonly 
+           style="background:#f8f9fa;">
+</div>
+                <div class="mb-3">
+                    <label class="form-label">Tanggal Transaksi</label>
+                    <input type="date" class="form-control" id="edit_tanggal">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                <button class="btn btn-primary btn-sm" onclick="updateData()">
+                    <i class="bi bi-save me-1"></i>Update
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentPage  = 1;
+    let searchTimer  = null;
+    let selectedFile = null;
+    let produkList   = [];
+
+    // ── LOAD DATA ──
+    async function loadData(page = 1) {
+        currentPage = page;
+        const search  = document.getElementById('searchInput').value;
+        const perPage = document.getElementById('perPageSelect').value;
+
+        const res  = await fetch(`/api/transaksi?page=${page}&per_page=${perPage}&search=${encodeURIComponent(search)}`);
+        const data = await res.json();
+
+        renderTable(data);
+        renderPagination(data);
+        loadStats();
+    }
+
+    function renderTable(data) {
+        const tbody  = document.getElementById('tableBody');
+        const perPage = parseInt(document.getElementById('perPageSelect').value);
+
+        if (!data.data.length) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">Tidak ada data ditemukan</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = data.data.map((row, i) => `
+            <tr>
+                <td>${(currentPage - 1) * perPage + i + 1}</td>
+                <td><span class="badge badge-primary">${row.no_invoice}</span></td>
+                <td><code style="font-size:0.78rem;">${row.kode_produk}</code></td>
+                <td>${row.nama_produk}</td>
+                <td>${row.tanggal_transaksi}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary py-0 px-2 me-1" onclick="showModalEdit(${row.id})" title="Edit">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="deleteRow(${row.id})" title="Hapus">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+
+        document.getElementById('paginationInfo').textContent =
+            `Menampilkan ${(currentPage-1)*perPage+1}–${Math.min(currentPage*perPage, data.total)} dari ${data.total} data`;
+    }
+
+    function renderPagination(data) {
+        const ul = document.getElementById('pagination');
+        if (data.total_pages <= 1) { ul.innerHTML = ''; return; }
+
+        let html = '';
+        html += `<li class="page-item ${data.page===1?'disabled':''}">
+                    <a class="page-link" onclick="loadData(${data.page-1})">&#8249;</a></li>`;
+
+        for (let p = Math.max(1, data.page-2); p <= Math.min(data.total_pages, data.page+2); p++) {
+            html += `<li class="page-item ${p===data.page?'active':''}">
+                        <a class="page-link" onclick="loadData(${p})">${p}</a></li>`;
+        }
+
+        html += `<li class="page-item ${data.page===data.total_pages?'disabled':''}">
+                    <a class="page-link" onclick="loadData(${data.page+1})">&#8250;</a></li>`;
+        ul.innerHTML = html;
+    }
+
+    // ── STATS ──
+    async function loadStats() {
+        const res  = await fetch('/api/transaksi?page=1&per_page=1');
+        const data = await res.json();
+        document.getElementById('statTotal').textContent = data.total.toLocaleString();
+
+        // Ambil stats tambahan
+        const res2  = await fetch('/api/stats');
+        const stats = await res2.json();
+        document.getElementById('statInvoice').textContent = stats.total_invoice?.toLocaleString() ?? '-';
+        document.getElementById('statProduk').textContent  = stats.total_produk?.toLocaleString() ?? '-';
+        document.getElementById('statPeriode').textContent = stats.periode ?? '-';
+    }
+
+    // ── UPLOAD ──
+    function handleFileSelect(input) {
+        if (input.files.length) {
+            selectedFile = input.files[0];
+            document.getElementById('fileName').textContent = selectedFile.name;
+            document.getElementById('selectedFile').style.display = 'block';
+            document.getElementById('btnUpload').disabled = false;
+        }
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        document.getElementById('dropZone').style.borderColor = '#c0c8ff';
+        const file = e.dataTransfer.files[0];
+        if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+            selectedFile = file;
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('selectedFile').style.display = 'block';
+            document.getElementById('btnUpload').disabled = false;
+        }
+    }
+
+    async function uploadFile() {
+        if (!selectedFile) return;
+
+        document.getElementById('uploadProgress').style.display = 'block';
+        document.getElementById('btnUpload').disabled = true;
+
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        try {
+            const res  = await fetch('/api/upload', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            document.getElementById('uploadProgress').style.display = 'none';
+            document.getElementById('btnUpload').disabled = false;
+
+            if (data.success) {
+                showToast(data.message, 'success');
+                selectedFile = null;
+                document.getElementById('fileInput').value = '';
+                document.getElementById('selectedFile').style.display = 'none';
+                loadData();
+                loadUploadLog();
+            } else {
+                showToast(data.message, 'error');
+            }
+        } catch (e) {
+            document.getElementById('uploadProgress').style.display = 'none';
+            document.getElementById('btnUpload').disabled = false;
+            showToast('Gagal menghubungi server', 'error');
+        }
+    }
+
+    // ── UPLOAD LOG ──
+    async function loadUploadLog() {
+        const res  = await fetch('/api/upload-log');
+        const data = await res.json();
+        const tbody = document.getElementById('uploadLogBody');
+
+        if (!data.data.length) {
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Belum ada riwayat upload</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = data.data.map((log, i) => `
+            <tr>
+                <td>${i+1}</td>
+                <td><i class="bi bi-file-earmark-excel text-success me-1"></i>${log.nama_file}</td>
+                <td><span class="badge bg-primary">${log.jumlah_baris.toLocaleString()} baris</span></td>
+                <td>${log.uploaded_at}</td>
+            </tr>
+        `).join('');
+    }
+
+    // ── INSERT ──
+    async function loadProduk() {
+    const res  = await fetch('/api/produk');
+    const data = await res.json();
+    produkList = data.data;
+
+    const optionsHtml = `<option value="">-- Pilih Kode Produk --</option>` +
+        produkList.map(p => `<option value="${p.kode_produk}" data-nama="${p.nama_produk}">
+            ${p.kode_produk} — ${p.nama_produk}
+        </option>`).join('');
+
+    document.getElementById('ins_kode_produk').innerHTML  = optionsHtml;
+    document.getElementById('edit_kode_produk').innerHTML = optionsHtml;
+}
+
+function fillNamaProduk(prefix) {
+    const select   = document.getElementById(`${prefix}_kode_produk`);
+    const selected = select.options[select.selectedIndex];
+    document.getElementById(`${prefix}_nama_produk`).value = 
+        selected ? (selected.getAttribute('data-nama') || '') : '';
+}
+
+function showModalInsert() {
+    document.getElementById('ins_kode_produk').value = '';
+    document.getElementById('ins_nama_produk').value = '';
+    document.getElementById('ins_no_invoice').value  = '';
+    document.getElementById('ins_tanggal').value     = '';
+    new bootstrap.Modal(document.getElementById('modalInsert')).show();
+}
+
+    async function insertData() {
+        const payload = {
+            no_invoice       : document.getElementById('ins_no_invoice').value.trim(),
+            kode_produk      : document.getElementById('ins_kode_produk').value.trim(),
+            nama_produk      : document.getElementById('ins_nama_produk').value.trim(),
+            tanggal_transaksi: document.getElementById('ins_tanggal').value
+        };
+
+        if (!payload.no_invoice || !payload.kode_produk || !payload.nama_produk || !payload.tanggal_transaksi) {
+            showToast('Semua field harus diisi!', 'error'); return;
+        }
+
+        const res  = await fetch('/api/transaksi', {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body   : JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        bootstrap.Modal.getInstance(document.getElementById('modalInsert')).hide();
+        showToast(data.message, data.success ? 'success' : 'error');
+        if (data.success) loadData();
+    }
+
+    // ── EDIT ──
+    async function showModalEdit(id) {
+        const res  = await fetch(`/api/transaksi/${id}`);
+        const data = await res.json();
+        const row  = data.data;
+
+        document.getElementById('edit_id').value          = row.id;
+        document.getElementById('edit_no_invoice').value  = row.no_invoice;
+        document.getElementById('edit_kode_produk').value = row.kode_produk;
+        document.getElementById('edit_nama_produk').value = row.nama_produk;
+
+        // Konversi DD/MM/YYYY → YYYY-MM-DD untuk input date
+        const [d, m, y] = row.tanggal_transaksi.split('/');
+        document.getElementById('edit_tanggal').value = `${y}-${m}-${d}`;
+
+        new bootstrap.Modal(document.getElementById('modalEdit')).show();
+    }
+
+    async function updateData() {
+        const id      = document.getElementById('edit_id').value;
+        const payload = {
+            no_invoice       : document.getElementById('edit_no_invoice').value.trim(),
+            kode_produk      : document.getElementById('edit_kode_produk').value.trim(),
+            nama_produk      : document.getElementById('edit_nama_produk').value.trim(),
+            tanggal_transaksi: document.getElementById('edit_tanggal').value
+        };
+
+        const res  = await fetch(`/api/transaksi/${id}`, {
+            method : 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body   : JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        bootstrap.Modal.getInstance(document.getElementById('modalEdit')).hide();
+        showToast(data.message, data.success ? 'success' : 'error');
+        if (data.success) loadData();
+    }
+
+    // ── DELETE ──
+    async function deleteRow(id) {
+        if (!confirm('Yakin ingin menghapus data ini?')) return;
+        const res  = await fetch(`/api/transaksi/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        showToast(data.message, data.success ? 'success' : 'error');
+        if (data.success) loadData();
+    }
+
+    async function deleteAll() {
+        if (!confirm('Yakin ingin menghapus SEMUA data transaksi? Tindakan ini tidak dapat dibatalkan!')) return;
+        const res  = await fetch('/api/transaksi/delete-all', { method: 'DELETE' });
+        const data = await res.json();
+        showToast(data.message, data.success ? 'success' : 'error');
+        if (data.success) loadData();
+    }
+
+    // ── SEARCH DEBOUNCE ──
+    function debounceSearch() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => loadData(1), 400);
+    }
+
+    // ── INIT ──
+    document.addEventListener('DOMContentLoaded', () => {
+        loadData();
+        loadUploadLog();
+        loadProduk();
+    });
+</script>
+{% endblock %}
